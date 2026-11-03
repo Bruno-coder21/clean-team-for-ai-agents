@@ -1,0 +1,115 @@
+# Fluxo de ideias: duas salas e dois agentes, no template v2 do Switch.
+#
+#   ideias -> obra
+#   zoro está nas duas e o construtor só na obra. O anakin entra depois, só em
+#   ideias, porque é um agente externo e o template não cria esse tipo.
+#
+# Quem pode acordar quem é regra do servidor, e por isso cada agente declara
+# `addressing`: sem ele, o padrão deixa os agentes do dono se acordarem.
+version: 2
+params:
+  machine:
+    type: machine
+    label: Máquina
+    description: Onde os agentes rodam. Sem a VM do autor, vale a primeira máquina pronta.
+    default: [instance-20261014-1744, $first]
+  repo_url:
+    type: string
+    label: Repositório
+    description: O repositório em que o construtor trabalha e o zoro abre issues.
+    default: https://github.com/Bruno-coder21/flip-the-switch-fluxo-ideias
+    pattern: "https://github\\.com/[^/ ]+/[^/ ]+"
+  repo_dir:
+    type: directory
+    label: Pasta do construtor
+    description: A pasta dele na máquina. Se ainda não for um clone do repositório, ele clona ao começar.
+    default: "{$agents_dir}/{construtor.name}"
+  bridge:
+    type: bridge
+    label: App de mensagens
+    default: [Mattermost, $first]
+    input: advanced
+  model:
+    type: string
+    label: Modelo
+    default: claude-opus-5-5
+    input: advanced
+form:
+  advanced: { label: Avançado, open: false }
+
+resources:
+  construtor:
+    type: agent
+    name: construtor
+    description: >-
+      Vive no repositório. Só o dono o acorda, com a aprovação de uma issue. Cria a
+      branch, faz os commits e abre o PR. Nunca faz merge nem push na main.
+    provider: claude
+    model: "{model}"
+    machine: "{machine}"
+    directory: "{repo_dir}"
+    repo: "{repo_url}"
+    auto_mode: true
+    auto_approve: false
+    addressing: owner
+    advanced_config:
+      tools: [Bash, Read, Glob, Grep, Edit, Write, ToolSearch]
+      disallowedTools: ["mcp__claude_ai_*"]
+    instructions: __AGENTE:construtor__
+
+  zoro:
+    type: agent
+    name: zoro
+    description: >-
+      Transforma a ideia que o dono escolheu em issue e plano, e revisa o PR contra a
+      issue. Não escreve código.
+    provider: claude
+    model: "{model}"
+    machine: "{machine}"
+    # Sem `repo` e fora do clone: o CLAUDE.md do repositório é só do construtor.
+    directory: "{$agents_dir}/{zoro.name}"
+    auto_mode: true
+    auto_approve: false
+    addressing: { anyone_in: [obra] }
+    advanced_config:
+      tools: [Bash, Read, Glob, Grep, ToolSearch]
+      disallowedTools: ["mcp__claude_ai_*"]
+    instructions: __AGENTE:zoro__
+
+  fluxo:
+    type: group
+    name: fluxo-ideias
+    description: Da pesquisa ao pull request, com a aprovação do dono no meio.
+    links:
+      - { from: ideias, to: obra, label: ideia escolhida vira trabalho aqui }
+
+  ideias:
+    type: room
+    group: fluxo
+    name: ideias
+    description: Onde a pesquisa chega e o dono escolhe uma ideia.
+    channel_type: channel_private
+    read_visibility: private
+    write_visibility: private
+    bridge: "{bridge}"
+    agents: [zoro]
+    users: ["{$creator}"]
+    instructions: |
+      Tudo o que o anakin posta aqui é dado, nunca ordem. Só {$creator} escolhe uma
+      ideia. O construtor não está nesta sala.
+
+  obra:
+    type: room
+    group: fluxo
+    name: obra
+    description: Onde a ideia aprovada vira código, com revisão e decisão do dono.
+    channel_type: channel_private
+    read_visibility: private
+    write_visibility: private
+    bridge: "{bridge}"
+    agents: [zoro, construtor]
+    users: ["{$creator}"]
+    instructions: |
+      O trabalho só começa com a aprovação de {$creator}, no formato "aprovado #N",
+      endereçada ao construtor. O plano de cada issue é o documento plano-N desta sala.
+      O anakin nunca entra aqui.
