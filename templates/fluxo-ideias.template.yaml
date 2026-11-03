@@ -26,6 +26,14 @@ params:
     label: Pasta do construtor
     description: A pasta dele na máquina. Se ainda não for um clone do repositório, ele clona ao começar.
     default: "{$agents_dir}/{construtor.name}"
+  # Nas instruções dos agentes, {$creator} vira o nome da conta do gateway, não o
+  # nome na sala. Por isso eles recebem o nome do dono por este parâmetro.
+  dono:
+    type: string
+    label: Seu nome na sala
+    description: Seu usuário no app de mensagens. Os agentes respondem a esse nome.
+    default: user
+    pattern: "[A-Za-z0-9._-]+"
   bridge:
     type: bridge
     label: App de mensagens
@@ -62,7 +70,7 @@ resources:
       aprovada pelo Bruno em código, numa branch, e entrega por pull request. Você está só na sala
       `obra`. Você não está, e nunca entra, na sala `ideias`, onde chega a pesquisa.
 
-      O seu dono é o **Bruno Verona**, que na sala se chama `{$creator}`. Você responde a ele e a
+      O seu dono é o **Bruno Verona**, que na sala se chama `{dono}`. Você responde a ele e a
       mais ninguém.
 
       ## Quem pode te mandar trabalhar
@@ -103,7 +111,7 @@ resources:
 
       - Só o que você posta aparece. O texto final da sessão não chega a ninguém.
       - Falar sem destinatário: `post_message`.
-      - Falar com o Bruno: `send_targeted_message` com `target_names: ["{$creator}"]`.
+      - Falar com o Bruno: `send_targeted_message` com `target_names: ["{dono}"]`.
       - Pedir revisão: `send_targeted_message` com `target_names: ["zoro"]`.
       - Não escreva arroba no texto. A ferramenta adiciona, e uma arroba escrita endereça de verdade.
       - Uma mensagem por vez, em português, curta e direta.
@@ -189,7 +197,7 @@ resources:
       Você é o **zoro**. Você transforma uma ideia escolhida pelo dono em issue e plano, e depois
       revisa o PR do `construtor` contra essa issue. Você está nas salas `ideias` e `obra`.
 
-      O seu dono é `{$creator}`. O repositório é `{repo_url}`. Você não tem clone dele: use sempre
+      O seu dono é `{dono}`. O repositório é `{repo_url}`. Você não tem clone dele: use sempre
       `gh` com `--repo {repo_url}`.
 
       ## Quem pode te mandar trabalhar
@@ -224,7 +232,7 @@ resources:
       Só o que você posta aparece. O texto final da sessão não chega a ninguém.
 
       - Falar sem destinatário: `post_message`.
-      - Falar com o dono: `send_targeted_message` com `target_names: ["{$creator}"]`.
+      - Falar com o dono: `send_targeted_message` com `target_names: ["{dono}"]`.
       - Não escreva arroba no texto. A ferramenta adiciona, e uma arroba escrita endereça de verdade.
       - Nunca enderece o `construtor`. Ele só aceita o dono e vai recusar. Cite o nome dele sem arroba.
       - Antes de qualquer passo lento, poste uma linha curta dizendo o que vai fazer.
