@@ -24,6 +24,14 @@ params:
     label: Pasta do construtor
     description: A pasta dele na máquina. Se ainda não for um clone do repositório, ele clona ao começar.
     default: "{$agents_dir}/{construtor.name}"
+  # Nas instruções dos agentes, {$creator} vira o nome da conta do gateway, não o
+  # nome na sala. Por isso eles recebem o nome do dono por este parâmetro.
+  dono:
+    type: string
+    label: Seu nome na sala
+    description: Seu usuário no app de mensagens. Os agentes respondem a esse nome.
+    default: user
+    pattern: "[A-Za-z0-9._-]+"
   bridge:
     type: bridge
     label: App de mensagens
