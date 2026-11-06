@@ -1,0 +1,7 @@
+[Unit]
+Description=Guarda do muro: mantem o analista so na sala clean-team
+
+[Service]
+Type=oneshot
+Environment=TZ=America/Recife
+ExecStart=/usr/bin/python3 -I %h/.local/lib/clean-team/muro.py %h/.config/clean-team/.env
