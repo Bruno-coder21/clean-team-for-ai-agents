@@ -1,0 +1,11 @@
+room:
+  name: clean-team
+  description: Clean team room for Project Kestrel. Raw competitive data stays here.
+  instructions: |
+    This is the clean team room for Project Kestrel. Only outside counsel and the analista agent belong here. Competitively sensitive information (customer-level prices, contract terms, future plans) may be discussed here and must never leave this room in raw form. Anything for the deal team must be aggregated, reviewed and approved by counsel. Never post to any other room. Use one thread per question.
+  bridge: Mattermost
+  channel_type: channel_private
+  read_visibility: private
+  write_visibility: private
+  agents: [analista]
+  users: [user]
